@@ -4,8 +4,8 @@ import logger from '../utils/logger.js';
 class RedisService {
   constructor() {
     this.client = redis.createClient({
-      host: '127.0.0.1',
-      port: 6379
+      host: process.env.REDIS_HOST,
+      port: process.env.REDIS_PORT
     });
     this.client.on('connect', () => {
       logger.info('Connected to Redis');
@@ -21,6 +21,9 @@ class RedisService {
         if (error) {
           reject(`Error setting key from Redis: ${error}`);
         } else {
+          this.client.expire(key, 300, async (error) => {
+            if (error) throw error;
+          });
           resolve();
         }
       });

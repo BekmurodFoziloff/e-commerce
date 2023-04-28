@@ -3,20 +3,20 @@ import smtpTransport from 'nodemailer-smtp-transport';
 
 export const transporter = nodemailer.createTransport(
   smtpTransport({
-    host: 'smtp.gmail.com',
-    service: 'gmail',
-    port: 587,
+    host: process.env.EMAIL_HOST,
+    service: process.env.EMAIL_SERVICE,
+    port: process.env.EMAIL_PORT,
     secure: false,
     auth: {
-      user: process.env.SMTP_EMAIL,
-      pass: process.env.SMTP_PASSWORD
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASSWORD
     }
   })
 );
 
 export const sendCreatedOrder = async (order) => {
   return {
-    from: process.env.SMTP_EMAIL,
+    from: process.env.EMAIL_USER,
     to: order.customer.email,
     subject: 'New order created',
     html: `A new order has been created with the following details:<br><br>
@@ -30,7 +30,7 @@ export const sendCreatedOrder = async (order) => {
 
 export const sendUpdatedOrderStatus = async (order) => {
   return {
-    from: process.env.SMTP_EMAIL,
+    from: process.env.EMAIL_USER,
     to: order.customer.email,
     subject: 'Order status updated',
     html: `

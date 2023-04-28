@@ -2,15 +2,11 @@ import { Router } from 'express';
 import productsService from '../services/products.service.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
 import { upload } from '../config/files.service.js';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import redisService from '../config/redis.service.js';
 import { validateInput } from '../middlewares/validateInput.middleware.js';
-import { productSchema } from '../utils/enter.validators.js';
+import { productSchema } from '../utils/inputData.validators.js';
 import { validationResult } from 'express-validator';
-import { productMiddleware } from '../utils/error.validator.js';
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { productMiddleware } from '../utils/processError.validator.js';
 
 class ProductsController {
   path = '/product';
@@ -42,7 +38,7 @@ class ProductsController {
         this.updateProduct
       );
     this.router.route(`${this.path}/:id/delete`).delete(authMiddleware, this.deleteProduct);
-    this.router.route(`${this.path}/image/:filename`).get(authMiddleware, this.getProductImage);
+    this.router.route(`${this.path}/:id/image`).get(authMiddleware, this.getProductImage);
   }
 
   async findProductById(req, res, next) {
@@ -83,7 +79,7 @@ class ProductsController {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        return res.status(400).json({ error: errors.array()[0].msg });
       }
       const newProduct = await productsService.createProduct(req.body, req.user, req.file.path);
       if (newProduct) {
@@ -99,7 +95,7 @@ class ProductsController {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        return res.status(400).json({ error: errors.array()[0].msg });
       }
       const { id } = req.params;
       const updatedProduct = await productsService.updateProduct(id, req.body);
@@ -129,8 +125,21 @@ class ProductsController {
 
   async getProductImage(req, res, next) {
     try {
-      const filePath = path.join(__dirname, '../uploads/productImages', req.params.filename);
-      return res.status(200).json({ filePath });
+      const { id } = req.params;
+      const cachedProduct = await redisService.getValue(`product:${id}`);
+      const product = JSON.parse(cachedProduct);
+      if (product && product.imageURL) {
+        res.setHeader('Content-Type', 'image/jpeg');
+        return res.sendFile(product.imageURL);
+      } else {
+        const product = await productsService.findProductById(id);
+        if (product) {
+          await redisService.setValue(`product:${id}`, JSON.stringify(product));
+          res.setHeader('Content-Type', 'image/jpeg');
+          return res.sendFile(product.imageURL);
+        }
+        return res.status(404).json(`Product with id ${id} not found`);
+      }
     } catch (error) {
       return res.status(error.status || 500).json({ error: error.message });
     }

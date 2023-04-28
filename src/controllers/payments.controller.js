@@ -17,7 +17,7 @@ class PaymentsController {
 
   setRotes() {
     this.router.route(`${this.path}/:paymentId`).get(authMiddleware, isCustomerPayment, this.findPaymentById);
-    this.router.route(`${this.path}`).get(authMiddleware, isCustomerPayment, this.findAllPayments);
+    this.router.route(`${this.path}`).get(authMiddleware, this.findAllPayments);
     this.router.route(`${this.path}`).post(authMiddleware, this.createPayment);
   }
 
@@ -69,7 +69,7 @@ class PaymentsController {
         customer: customer.id,
         description: `Payment for order ${orderId}`
       });
-      const payment = paymentsService.createPayment({
+      const payment = await paymentsService.createPayment({
         order: orderId,
         customer: customerId,
         amount,

@@ -6,7 +6,7 @@ class ProductsService {
   }
 
   async findProductByIds(productIds) {
-    return await productModel.find({ id: { in: productIds } }).populate('owner', '-password');
+    return await productModel.find({ _id: { $in: productIds } }).populate('owner', '-password');
   }
 
   async findAllProducts(queryObject) {

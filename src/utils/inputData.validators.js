@@ -45,7 +45,6 @@ export const updateCartSchema = Joi.object({
 });
 
 export const updaetOrderSchema = Joi.object({
-  customer: Joi.string().required(),
   products: Joi.array()
     .items(
       Joi.object({
@@ -53,9 +52,7 @@ export const updaetOrderSchema = Joi.object({
         quantity: Joi.number().integer().required()
       })
     )
-    .required(),
-  subTotalPrice: Joi.number().required(),
-  status: Joi.string().required()
+    .required()
 });
 
 export const updateOrderStatusSchema = Joi.object({

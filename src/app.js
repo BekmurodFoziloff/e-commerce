@@ -3,8 +3,11 @@ import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import swaggerJSDoc from 'swagger-jsdoc';
+// import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUiExpress from 'swagger-ui-express';
+import YAML from 'yamljs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { errorHandler } from './middlewares/errorHandler.middleware.js';
 import morganMiddleware from './middlewares/morgan.middleware.js';
 import usersController from './controllers/users.controller.js';
@@ -15,14 +18,17 @@ import paymentsController from './controllers/payments.controller.js';
 import ordersController from './controllers/orders.controller.js';
 import logger from './utils/logger.js';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 class App {
   constructor() {
     this.app = express();
     this.setConfig();
+    this.setSwaggerConfig();
     this.setControllers();
     this.setMongoConfig();
     this.setErrorHandlingMiddleware();
-    this.setSwaggerConfig();
   }
 
   setConfig() {
@@ -55,28 +61,39 @@ class App {
   }
 
   setSwaggerConfig() {
-    const options = {
-      definition: {
-        openapi: '3.0.0',
-        info: {
-          title: 'E-Commerce API',
-          version: '1.0.0',
-          description: 'E-Commerce API',
-          license: {
-            name: 'MIT',
-            url: 'https://spdx.org/licenses/MIT.html'
-          }
-        },
-        servers: [
-          {
-            url: 'http://localhost:3000'
-          }
-        ]
-      },
-      apis: ['./controllers/*.js']
-    };
-    const specs = swaggerJSDoc(options);
-    this.app.use('/api-docs', swaggerUiExpress.serve, swaggerUiExpress.setup(specs, { explorer: true }));
+    // const options = {
+    //   swaggerDefinition: {
+    //     openapi: '3.0.0',
+    //     info: {
+    //       title: 'E-Commerce API',
+    //       version: '1.0.0',
+    //       description: 'E-Commerce API',
+    //       license: {
+    //         name: 'MIT',
+    //         url: 'https://spdx.org/licenses/MIT.html'
+    //       }
+    //     },
+    //     components: {
+    //       securitySchemes: {
+    //         bearerAuth: {
+    //           type: 'http',
+    //           scheme: 'bearer',
+    //           bearerFormat: 'JWT'
+    //         }
+    //       }
+    //     },
+    //     servers: [
+    //       {
+    //         url: 'http://localhost:3000',
+    //         description: 'Development server'
+    //       }
+    //     ]
+    //   },
+    //   apis: ['./controllers/*.js', './docs/swagger.yaml']
+    // };
+    // const specs = swaggerJSDoc(options);
+    const swaggerDocument = YAML.load(path.join(__dirname, './docs/swagger.yaml'));
+    this.app.use('/api-docs', swaggerUiExpress.serve, swaggerUiExpress.setup(swaggerDocument, { explorer: true }));
   }
 
   setControllers() {

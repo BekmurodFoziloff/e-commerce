@@ -2,12 +2,13 @@ import jwt from 'jsonwebtoken';
 import usersService from '../services/users.service.js';
 
 async function authMiddleware(req, res, next) {
-  const token = req.cookies.token || req.headers.authorization?.split(' ')[1] || req.query.token || req.body.token;
-  if (token) {
+  // const token = req.cookies.token; //|| req.headers.authorization?.split(' ')[1] || req.query.token || req.body.token;
+  const cookies = req.cookies;
+  if (cookies && cookies.Authentication) {
     const secret = process.env.JWT_TOKEN_SECRET;
     try {
-      const decoded = jwt.verify(token, secret);
-      const user = await usersService.findUserById(decoded.id);
+      const decoded = jwt.verify(cookies.Authentication, secret);
+      const user = await usersService.findUserById(decoded.userId);
       if (user) {
         req.user = user;
         next();

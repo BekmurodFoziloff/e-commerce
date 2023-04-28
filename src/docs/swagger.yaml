@@ -1,0 +1,954 @@
+openapi: 3.0.0
+info:
+  description: E-commerce API
+  version: 1.0.0
+  title: E-commerce API
+  license:
+    name: MIT
+    url: https://spdx.org/licenses/MIT.html
+servers:
+- url: http://localhost:3000
+  description: Development server
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+- bearerAuth: []
+schemes:
+- http
+consumes:
+- application/json
+produces:
+- application/json
+paths:
+  #-----authentication-----
+  /auth/register:
+    post:
+      summary: Register a new user
+      description: Registers a new user and returns the created object
+      operationId: registerPost
+      parameters: 
+      - in: body
+        name: user
+        description: User object to register
+        required: true
+        schema:
+          $ref: '#/definitions/Register'
+      responses:
+        201:
+          description: Successful response
+          schema:
+            $ref: '#/definitions/User'
+      x-swagger-router-controller: Default
+  /auth/login:
+    post:
+      summary: Login a user
+      description: logins a user and returns the created object
+      operationId: loginPost
+      parameters: 
+      - in: body
+        name: user
+        description: User object to login
+        required: true
+        schema:
+          $ref: '#/definitions/Login'
+      responses:
+        200:
+          description: Successful response
+          schema:
+            $ref: '#/definitions/User'
+      x-swagger-router-controller: Default
+  /auth/logout:
+    get:
+      summary: Logout a user
+      description: logouts a user
+      operationId: logoutPost
+      parameters: 
+      responses:
+        200:
+          description: Successful response
+      x-swagger-router-controller: Default
+  #-----user-----
+  /user:
+    get:
+      summary: Retrieve all user
+      description: Returns a list of all user
+      operationId: userGET
+      parameters: []
+      responses:
+        200:
+          description: Successful response
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+      x-swagger-router-controller: Default
+  /user/{id}:
+    get:
+      summary: Retrieve a single user
+      description: Returns a single user by ID
+      operationId: userUserIdGET
+      parameters:
+      - name: id
+        in: path
+        description: User ID to retrieve
+        required: true
+        type: string
+      responses:
+        200:
+          description: Successful response
+          schema:
+            $ref: '#/definitions/User'
+        404:
+          description: User not found
+      x-swagger-router-controller: Default
+  /user/{id}/update:
+    put:
+      summary: Update a user
+      description: Updates an existing user and returns the updated object
+      operationId: userUserIdPUT
+      parameters:
+      - name: id
+        in: path
+        description: User ID to update
+        required: true
+        type: string
+      - in: body
+        name: user
+        description: User object with new data
+        required: true
+        schema:
+          $ref: '#/definitions/UserInput'
+      responses:
+        200:
+          description: Successful response
+          schema:
+            $ref: '#/definitions/User'
+        404:
+          description: User not found
+      x-swagger-router-controller: Default
+  /user/{id}/delete:
+    delete:
+      summary: Delete a user
+      description: Deletes a user by ID
+      operationId: userUserIdDELETE
+      parameters:
+      - name: id
+        in: path
+        description: User ID to delete
+        required: true
+        type: string
+      responses:
+        204:
+          description: Successful response
+      x-swagger-router-controller: Default
+  /user/{id}/update/address:
+    put:
+      summary: Update a user address
+      description: Updates an existing user address and returns the updated object
+      operationId: userUserIdAdressPUT
+      parameters:
+      - name: id
+        in: path
+        description: User ID to update
+        required: true
+        type: string
+      - in: body
+        name: user
+        description: User object with new data
+        required: true
+        schema:
+          $ref: '#/definitions/AddressInput'
+      responses:
+        200:
+          description: Successful response
+          schema:
+            $ref: '#/definitions/User'
+        404:
+          description: User not found
+      x-swagger-router-controller: Default
+  /user/{id}/avatar:
+    put:
+      summary: Upload user avatar
+      description: Upload a new avatar for a user
+      consumes:
+      - multipart/form-data
+      parameters:
+      - name: id
+        in: path
+        description: ID of the user to upload for avatar
+        required: true
+      - name: avatar
+        in: formData
+        description: Avatar image file to upload
+        required: true
+        type: file
+        schema:
+          type: string
+          format: binary
+      responses:
+        200:
+          description: Avatar uploaded successfully
+        400:
+          description: Invalid input provided
+      x-swagger-router-controller: Default
+  /user/{id}/image:
+    get:
+      summary: Retrieve a single user avatar
+      description: Returns a single user avatar by ID
+      operationId: userUserIdAvatarGET
+      parameters:
+      - name: id
+        in: path
+        description: User ID to retrieve
+        required: true
+        type: string
+      responses:
+        200:
+          description: Successful response
+        404:
+          description: User not found
+      x-swagger-router-controller: Default
+
+  #-----product-----
+  /product:
+    get:
+      summary: Retrieve all product
+      description: Returns a list of all product
+      operationId: productGET
+      parameters: []
+      responses:
+        200:
+          description: Successful response
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+      x-swagger-router-controller: Default
+  /product/{id}:
+    get:
+      summary: Retrieve a single product
+      description: Returns a single product by ID
+      operationId: productProductIdGET
+      parameters:
+      - name: id
+        in: path
+        description: Product ID to retrieve
+        required: true
+        type: string
+      responses:
+        200:
+          description: Successful response
+          schema:
+            $ref: '#/definitions/Product'
+        404:
+          description: Product not found
+      x-swagger-router-controller: Default
+  /product/new:
+    post:
+      summary: Create a new product
+      description: Creates a new product and returns the created object
+      operationId: productPOST
+      parameters:
+      - in: body
+        name: product
+        description: Product object to create
+        required: true
+        schema:
+          $ref: '#/definitions/ProductInput'
+      responses:
+        201:
+          description: Successful response
+          schema:
+            $ref: '#/definitions/Product'
+      x-swagger-router-controller: Default
+  /product/{id}/update:
+    put:
+      summary: Update a product
+      description: Updates an existing product and returns the updated object
+      operationId: productProductIdPUT
+      parameters:
+      - name: id
+        in: path
+        description: Product ID to update
+        required: true
+        type: string
+      - in: body
+        name: product
+        description: Product object with new data
+        required: true
+        schema:
+          $ref: '#/definitions/ProductInput'
+      responses:
+        200:
+          description: Successful response
+          schema:
+            $ref: '#/definitions/Product'
+        404:
+          description: Product not found
+      x-swagger-router-controller: Default
+  /product/{id}/delete:
+    delete:
+      summary: Delete a product
+      description: Deletes a product by ID
+      operationId: productProductIdDELETE
+      parameters:
+      - name: id
+        in: path
+        description: Product ID to delete
+        required: true
+        type: string
+      responses:
+        204:
+          description: Successful response
+      x-swagger-router-controller: Default
+
+  #-----cart-----
+  /cart:
+    get:
+      summary: Retrieve all cart
+      description: Returns a list of all cart
+      operationId: cartGET
+      parameters: []
+      responses:
+        200:
+          description: Successful response
+      x-swagger-router-controller: Default
+  /cart/new:
+    post:
+      summary: Create a new cart
+      description: Creates a new cart and returns the created object
+      operationId: cartPOST
+      parameters:
+      - in: body
+        name: cart
+        description: Cart object to create
+        required: true
+        schema:
+          $ref: '#/definitions/CartInput'
+      responses:
+        201:
+          description: Successful response
+      x-swagger-router-controller: Default
+  /cart/{productId}/update:
+    put:
+      summary: Update a cart
+      description: Updates an existing cart and returns the updated object
+      operationId: cartCartIdPUT
+      parameters:
+      - name: productId
+        in: path
+        description: Cart ID to update
+        required: true
+        type: string
+      - in: body
+        name: cart
+        description: Cart object with new data
+        required: true
+        schema:
+          $ref: '#/definitions/CartInput'
+      responses:
+        200:
+          description: Successful response
+          schema:
+            $ref: '#/definitions/Cart'
+        404:
+          description: Cart not found
+      x-swagger-router-controller: Default
+  /cart/{productId}/delete:
+    delete:
+      summary: Delete a cart
+      description: Deletes a cart by ID
+      operationId: cartCartIdDELETE
+      parameters:
+      - name: productId
+        in: path
+        description: Cart ID to delete
+        required: true
+        type: string
+      responses:
+        204:
+          description: Successful response
+      x-swagger-router-controller: Default
+
+  #-----order-----
+  /order:
+    get:
+      summary: Retrieve all order
+      description: Returns a list of all order
+      operationId: orderGET
+      parameters: []
+      responses:
+        200:
+          description: Successful response
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Order'
+      x-swagger-router-controller: Default
+  /order/{id}:
+    get:
+      summary: Retrieve a single order
+      description: Returns a single order by ID
+      operationId: orderOrderIdGET
+      parameters:
+      - name: id
+        in: path
+        description: Order ID to retrieve
+        required: true
+        type: string
+      responses:
+        200:
+          description: Successful response
+          schema:
+            $ref: '#/definitions/Order'
+        404:
+          description: Order not found
+      x-swagger-router-controller: Default
+  /order/new:
+    post:
+      summary: Create a new order
+      description: Creates a new order and returns the created object
+      operationId: orderPOST
+      parameters:
+      responses:
+        201:
+          description: Successful response
+      x-swagger-router-controller: Default
+  /order/{id}/update:
+    put:
+      summary: Update a order
+      description: Updates an existing order and returns the updated object
+      operationId: orderOrderIdPUT
+      parameters:
+      - name: id
+        in: path
+        description: Order ID to update
+        required: true
+        type: string
+      - in: body
+        name: order
+        description: Order object with new data
+        required: true
+        schema:
+          $ref: '#/definitions/OrderInput'
+      responses:
+        200:
+          description: Successful response
+          schema:
+            $ref: '#/definitions/Order'
+        404:
+          description: Order not found
+      x-swagger-router-controller: Default
+  /order/{id}/delete:
+    delete:
+      summary: Delete a order
+      description: Deletes a order by ID
+      operationId: orderOrderIdDELETE
+      parameters:
+      - name: id
+        in: path
+        description: Order ID to delete
+        required: true
+        type: string
+      responses:
+        204:
+          description: Successful response
+      x-swagger-router-controller: Default
+  /order/{id}/update/status:
+    put:
+      summary: Update a order status
+      description: Updates an existing order status and returns the updated object
+      operationId: orderOrderIdPUT
+      parameters:
+      - name: id
+        in: path
+        description: Order ID to update
+        required: true
+        type: string
+      - in: body
+        name: order
+        description: Order object with new data
+        required: true
+        schema:
+          $ref: '#/definitions/OrderStatusInput'
+      responses:
+        200:
+          description: Successful response
+          schema:
+            $ref: '#/definitions/Order'
+        404:
+          description: Order not found
+      x-swagger-router-controller: Default
+  
+  #-----payment-----
+  /payment:
+    get:
+      summary: Retrieve all payment
+      description: Returns a list of all payment
+      operationId: paymentGET
+      parameters: []
+      responses:
+        200:
+          description: Successful response
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Payment'
+      x-swagger-router-controller: Default
+  /payment/{paymentId}:
+    get:
+      summary: Retrieve a single payment
+      description: Returns a single payment by ID
+      operationId: paymentPaymentIdGET
+      parameters:
+      - name: paymentId
+        in: path
+        description: Payment ID to retrieve
+        required: true
+        type: string
+      responses:
+        200:
+          description: Successful response
+          schema:
+            $ref: '#/definitions/Payment'
+        404:
+          description: Payment not found
+      x-swagger-router-controller: Default
+  /payment/new:
+    post:
+      summary: Create a new payment
+      description: Creates a new payment and returns the created object
+      operationId: paymentPOST
+      parameters:
+      - in: body
+        name: payment
+        description: Payment object to create
+        required: true
+        schema:
+          $ref: '#/definitions/PaymentInput'
+      responses:
+        201:
+          description: Successful response
+          schema:
+            $ref: '#/definitions/Payment'
+      x-swagger-router-controller: Default
+
+definitions:
+  User:
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+        description: Unique ID of the user
+      email:
+        type: string
+        format: email
+        description: Email of the user
+      userName:
+        type: string
+        description: Username of the user
+      firstName:
+        type: string
+        description: Firstname of the user
+      lastName:
+        type: string
+        description: Lastname of the user
+      password:
+        type: string
+        description: Password of the user
+      address: 
+        type: object
+        properties:
+          street: 
+            type: string
+            description: Street of the user
+          city: 
+            type: string
+            description: City of the user
+          state: 
+            type: string
+            description: State of the user
+          country:
+            type: string
+            description: Country of the user
+          zipCode: 
+            type: string
+            description: ZipCode of the user
+    example:
+      id: 644a78fbe792d9513a9d10e5
+      email: johndoe@gmail.com
+      userName: JohnDoe
+      firstName: John
+      lastName: Doe
+      password: StrongPassword
+      address: 
+        street: Amir Temur, Home N-41
+        city: Tashkent
+        state: Tashkent
+        country: Uzbekistan
+        zipCode: 123456
+
+  Register:
+    type: object
+    required:
+    - email
+    - firstName
+    - userName
+    - lastName
+    - password
+    properties:
+      email:
+        type: string
+        format: email
+        description: Email of the user
+      userName:
+        type: string
+        description: Username of the user
+      firstName:
+        type: string
+        description: Firstname of the user
+      lastName:
+        type: string
+        description: Lastname of the user
+      password:
+        type: string
+        description: Password of the user
+    example:
+      email: johndoe@gmail.com
+      userName: JohnDoe
+      firstName: John
+      lastName: Doe
+      password: StrongPassword
+
+  Login:
+    type: object
+    properties:
+      email:
+        type: string
+        format: email
+        description: Email of the user
+      password:
+        type: string
+        description: Password of the user
+    example:
+      email: johndoe@gmail.com
+      password: StrongPassword
+
+  UserInput:
+    type: object
+    properties:
+      userName:
+        type: string
+        description: Username of the user
+      firstName:
+        type: string
+        description: Firstname of the user
+      lastName:
+        type: string
+        description: Lastname of the user
+
+  AddressInput:
+    type: object
+    properties:
+      street: 
+        type: string
+        description: Street of the user
+      city: 
+        type: string
+        description: City of the user
+      state: 
+        type: string
+        description: State of the user
+      country:
+        type: string
+        description: Country of the user
+      zipCode: 
+        type: string
+        description: ZipCode of the user
+    example:
+      street: Amir Temur, Home N-41
+      city: Tashkent
+      state: Tashkent
+      country: Uzbekistan
+      zipCode: 123456
+
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+        description: Unique ID of the product
+      name:
+        type: string
+        description: Name of the product
+      description:
+        type: string
+        description: Description of the product
+      price:
+        type: number
+        format: float
+        description: Price of the product
+      imageURL:
+        type: string
+        description: ImageURL of the product
+      category:
+        type: string
+        description: Category of the product
+      quantity:
+        type: number
+        format: integer
+        description: Quantity of the product
+      owner:
+        type: object
+        properties:
+          schema:
+            $ref: '#/definitions/Product' 
+    example:
+      id: 644a78fbe792d9513a9d10e5
+      name: Macbook M2 Pro
+      description: Notebook
+      price: 2350
+      imageURL: imageURL
+      category: Apple
+      quantity: 500
+      owner: 
+        id: 644a78fbe792d9513a9d10e5
+        email: johndoe@gmail.com
+        userName: JohnDoe
+        firstName: John
+        lastName: Doe
+        password: StrongPassword
+        address: 
+          street: Amir Temur, Home N-41
+          city: Tashkent
+          state: Tashkent
+          country: Uzbekistan
+          zipCode: 123456
+
+  ProductInput:
+    type: object
+    required:
+    - name
+    - description
+    - price
+    - imageURL
+    - category
+    - quantity
+    properties:
+      name:
+        type: string
+        description: Name of the product
+      description:
+        type: string
+        description: Description of the product
+      price:
+        type: number
+        format: float
+        description: Price of the product
+      imageURL:
+        type: string
+        description: ImageURL of the product
+      category:
+        type: string
+        description: Category of the product
+      quantity:
+        type: number
+        format: integer
+        description: Quantity of the product
+    example:
+      name: Macbook M2 Pro
+      description: Notebook
+      price: 2350
+      imageURL: imageURL
+      category: Apple
+      quantity: 500
+  
+  CartInput:
+    type: object
+    required:
+    - productId
+    - quantity
+    properties:
+      productId:
+        type: string
+        format: uuid
+        description: Unique Product ID of the order
+      quantity:
+        type: number
+        format: integer
+        description: Quantity of the cart
+    example:
+      productId: 644a78fbe792d9513a9d10e5
+      quantity: 5
+  
+  Order:
+    type: object
+    required:
+    - customer
+    - products
+    - subTotalPrice
+    properties:
+      customer:
+        type: string
+        format: uuid
+        description: The ID of the customer who placed the order
+      products:
+        type: array
+        items:
+          required:
+          - product
+          - quantity
+          type: object
+          properties:
+            product:
+              type: string
+              format: uuid
+              description: The ID of the product being ordered
+            quantity:
+              type: integer
+              minimum: 1
+              description: The quantity of the product being ordered
+      subTotalPrice:
+        type: number
+        format: float
+        minimum: 0
+        description: The total price of the order, without taxes or discounts
+      status:
+        type: string
+        enum:
+        - pending
+        - shipped
+        - delivered
+        default: pending
+        description: The status of the order
+    example:
+      customer: 6164b77b198d3b4faa9c6b05
+      products:
+      - product: 6164b77b198d3b4faa9c6b06
+        quantity: 2
+      - product: 6164b77b198d3b4faa9c6b07
+        quantity: 1
+      subTotalPrice: 27.50
+      status: pending
+
+  OrderInput:
+    type: array
+    items:
+      required:
+      - product
+      - quantity
+      type: object
+      properties:
+        product:
+          type: string
+          format: uuid
+          description: The ID of the product being ordered
+        quantity:
+          type: integer
+          minimum: 1
+          description: The quantity of the product being ordered
+  
+  OrderStatusInput:
+    type: object
+    required:
+    - status
+    properties:
+      type: string
+      enum:
+      - pending
+      - shipped
+      - delivered
+      default: pending
+      description: The status of the order
+    example: 
+      status: pending
+
+  Payment:
+    type: object
+    required:
+      - order
+      - customer
+      - amount
+      - paymentId
+    properties:
+      order:
+        type: string
+        format: uuid
+        description: The ID of the order that was paid for
+      customer:
+        type: string
+        format: uuid
+        description: The ID of the customer who made the payment
+      amount:
+        type: number
+        format: float
+        minimum: 0
+        description: The amount of the payment
+      paymentStatus:
+        type: string
+        enum:
+          - succeeded
+          - failed
+        default: succeeded
+        description: The status of the payment
+      paymentDate:
+        type: string
+        format: date-time
+        default: '2023-04-28T00:00:00Z'
+        description: The date and time when the payment was made
+      paymentId:
+        type: string
+        description: The ID of the payment, as provided by the payment provider
+    example:
+      order: 6164b77b198d3b4faa9c6b08
+      customer: 6164b77b198d3b4faa9c6b05
+      amount: 27.50
+      paymentStatus: succeeded
+      paymentDate: '2023-04-28T09:45:00Z'
+      paymentId: ch_1234567890
+
+  PaymentInput:
+    type: object
+    required:
+      - orderId
+      - customerId
+      - amount
+      - name
+      - email
+      - token
+    properties:
+      orderId:
+        type: string
+        format: uuid
+        description: The ID of the order that was paid for
+      customerId:
+        type: string
+        format: uuid
+        description: The ID of the customer that was paid for
+      amount:
+        type: number
+        format: float
+        description: Amount of the order sub total price
+      name:
+        type: string
+        description: Name of the Customer
+      email:
+        type: string
+        format: email
+        description: Email of the Customer
+      token:
+        type: string
+        description: Token of the Customer
+    example:
+      orderId: 6164b77b198d3b4faa9c6b08
+      customerId: 6164b77b198d3b4faa9c6b05
+      amount: 27.50
+      name: John
+      email: johndoe@gmail.com
+      token: generate token

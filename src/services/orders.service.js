@@ -8,6 +8,7 @@ class OrdersService {
   async findAllOrders(queryObject, userId) {
     let query = {};
     let pageNumber = 1;
+    const pageSize = process.env.PAGE_SIZE;
     if (userId) {
       query.customer = userId;
     } else if (queryObject.page) {
@@ -19,7 +20,6 @@ class OrdersService {
     } else if (queryObject.status) {
       query.status = queryObject.status;
     }
-    const pageSize = process.env.PAGE_SIZE;
     return await orderModel
       .find(query)
       .skip(pageNumber * pageSize - pageSize)
