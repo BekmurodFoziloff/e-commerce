@@ -6,7 +6,7 @@ class PaymentsService {
   }
 
   async findAllPayments(userId) {
-    return await paymentModel.find({ customer: userId });
+    return await paymentModel.find({ customer: userId }).sort({ createdAt: -1 });
   }
 
   async createPayment(paymentData) {

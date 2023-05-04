@@ -24,7 +24,7 @@ class CartsController {
 
   async getCart(req, res, next) {
     try {
-      const cachedCart = await redisService.getValue('cart');
+      const cachedCart = await redisService.getValue(`cartUserId:${req.user.id}`);
       const cart = req.cookies.cart || JSON.parse(cachedCart) || [];
       const productIds = cart.map((item) => item.productId);
       const products = await productsService.findProductByIds(productIds);
@@ -44,7 +44,7 @@ class CartsController {
   async createCart(req, res, next) {
     try {
       const { productId, quantity } = req.body;
-      const cachedCart = await redisService.getValue('cart');
+      const cachedCart = await redisService.getValue(`cartUserId:${req.user.id}`);
       let cart = req.cookies.cart || JSON.parse(cachedCart) || [];
       const existingItemIndex = cart.findIndex((item) => item.productId === productId);
       if (existingItemIndex !== -1) {
@@ -52,9 +52,9 @@ class CartsController {
       } else {
         cart.push({ productId, quantity });
       }
-      await redisService.setValue('cart', JSON.stringify(cart));
+      await redisService.setValue(`cartUserId:${req.user.id}`, JSON.stringify(cart));
       res.cookie('cart', cart, { httpOnly: true, secure: true });
-      res.status(201).json('Item added to cart');
+      res.status(201).json(cart);
     } catch (error) {
       return res.status(error.status || 500).json({ error: error.message });
     }
@@ -64,15 +64,15 @@ class CartsController {
     try {
       const { productId } = req.params;
       const { quantity } = req.body;
-      const cachedCart = await redisService.getValue('cart');
+      const cachedCart = await redisService.getValue(`cartUserId:${req.user.id}`);
       let cart = req.cookies.cart || JSON.parse(cachedCart) || [];
       const itemIndex = cart.findIndex((item) => item.productId === productId);
       if (itemIndex !== -1) {
         cart[itemIndex].quantity = Number(quantity);
       }
-      await redisService.setValue('cart', JSON.stringify(cart));
+      await redisService.setValue(`cartUserId:${req.user.id}`, JSON.stringify(cart));
       res.cookie('cart', cart, { httpOnly: true, secure: true });
-      res.status(200).json('Cart item quantity updated');
+      res.status(200).json(cart);
     } catch (error) {
       return res.status(error.status || 500).json({ error: error.message });
     }
@@ -81,15 +81,15 @@ class CartsController {
   async deleteCart(req, res, next) {
     try {
       const { productId } = req.params;
-      const cachedCart = await redisService.getValue('cart');
+      const cachedCart = await redisService.getValue(`cartUserId:${req.user.id}`);
       let cart = req.cookies.cart || JSON.parse(cachedCart) || [];
       const itemIndex = cart.findIndex((item) => item.productId === productId);
       if (itemIndex !== -1) {
         cart.splice(itemIndex, 1);
       }
-      await redisService.setValue('cart', JSON.stringify(cart));
+      await redisService.setValue(`cartUserId:${req.user.id}`, JSON.stringify(cart));
       res.cookie('cart', cart, { httpOnly: true, secure: true });
-      res.status(200).json('Item removed from cart');
+      res.status(200).json(cart);
     } catch (error) {
       return res.status(error.status || 500).json({ error: error.message });
     }

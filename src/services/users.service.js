@@ -10,7 +10,7 @@ class UsersService {
   }
 
   async findAllUsers() {
-    return await userModel.find();
+    return await userModel.find().sort({ createdAt: -1 });
   }
 
   async createUser(userData) {

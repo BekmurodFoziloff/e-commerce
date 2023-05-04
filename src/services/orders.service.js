@@ -22,6 +22,7 @@ class OrdersService {
     }
     return await orderModel
       .find(query)
+      .sort({ createdAt: -1 })
       .skip(pageNumber * pageSize - pageSize)
       .limit(pageSize)
       .populate('customer', '-password')

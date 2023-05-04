@@ -66,7 +66,7 @@ class OrdersController {
 
   async createOrder(req, res, next) {
     try {
-      const cachedCart = await redisService.getValue('cart');
+      const cachedCart = await redisService.getValue(`cartUserId:${req.user.id}`);
       let cart = req.cookies.cart || JSON.parse(cachedCart) || [];
       let subTotalPrice = 0;
       if (cart) {
@@ -84,7 +84,7 @@ class OrdersController {
         });
         if (newOrder) {
           await redisService.setValue(`order:${newOrder.id}`, JSON.stringify(newOrder));
-          await redisService.deleteValue('cart');
+          await redisService.deleteValue(`cartUserId:${req.user.id}`);
           res.clearCookie('cart');
           transporter.sendMail(sendCreatedOrder(newOrder));
           return res.status(201).json(newOrder);
