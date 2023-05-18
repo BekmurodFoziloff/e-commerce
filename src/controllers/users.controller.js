@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import usersService from '../services/users.service.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
-import { upload } from '../config/files.service.js';
+import upload from '../config/files.service.js';
 import redisService from '../config/redis.service.js';
 import { validateInput } from '../middlewares/validateInput.middleware.js';
 import { updateUserAddressSchema, updateUserSchema } from '../utils/inputData.validators.js';
@@ -40,11 +40,11 @@ class UsersController {
       const { id } = req.params;
       const cachedUser = await redisService.getValue(`user:${id}`);
       if (cachedUser) {
-        return res.status(200).json(JSON.parse(cachedUser));
+        return res.status(200).json(cachedUser);
       } else {
         const user = await usersService.findUserById(id);
         if (user) {
-          await redisService.setValue(`user:${id}`, JSON.stringify(user));
+          await redisService.setValue(`user:${id}`, user);
           return res.status(200).json(user);
         }
         return res.status(404).json(`User with id ${id} not found`);
@@ -56,12 +56,13 @@ class UsersController {
 
   async findAllUsers(req, res, next) {
     try {
+      const { page } = req.query;
       const cachedUsers = await redisService.getValue('users');
-      if (cachedUsers) {
-        res.status(200).json(JSON.parse(cachedUsers));
+      if (cachedUsers && !page) {
+        res.status(200).json(cachedUsers);
       } else {
-        const users = await usersService.findAllUsers();
-        await redisService.setValue('users', JSON.stringify(users));
+        const users = await usersService.findAllUsers(Number(page));
+        await redisService.setValue('users', users);
         return res.status(200).json(users);
       }
     } catch (error) {
@@ -78,7 +79,7 @@ class UsersController {
       const { id } = req.params;
       const updatedUser = await usersService.updateUser(id, req.body);
       if (updatedUser) {
-        await redisService.setValue(`user:${id}`, JSON.stringify(updatedUser));
+        await redisService.setValue(`user:${id}`, updatedUser);
         return res.status(200).json(updatedUser);
       }
       return res.status(404).json(`User with id ${id} not found`);
@@ -110,7 +111,7 @@ class UsersController {
       const { id } = req.params;
       const updatedUser = await usersService.updateUserAddress(id, req.body);
       if (updatedUser) {
-        await redisService.setValue(`user:${id}`, JSON.stringify(updatedUser));
+        await redisService.setValue(`user:${id}`, updatedUser);
         return res.status(200).json(updatedUser);
       }
       return res.status(404).json(`User with id ${id} not found`);
@@ -124,7 +125,7 @@ class UsersController {
       const { id } = req.params;
       const updatedUser = await usersService.addAvatar(id, req.file.path);
       if (updatedUser) {
-        await redisService.setValue(`user:${id}`, JSON.stringify(updatedUser));
+        await redisService.setValue(`user:${id}`, updatedUser);
         return res.status(200).json(updatedUser);
       }
       return res.status(404).json(`User with id ${id} not found`);
@@ -137,13 +138,13 @@ class UsersController {
     try {
       const { id } = req.params;
       const cachedUser = await redisService.getValue(`user:${id}`);
-      const user = JSON.parse(cachedUser);
+      const user = cachedUser;
       if (user && user.avatar) {
         return res.sendFile(user.avatar);
       } else {
         const user = await usersService.findUserById(id);
         if (user) {
-          await redisService.setValue(`user:${id}`, JSON.stringify(user));
+          await redisService.setValue(`user:${id}`, user);
           return res.sendFile(user.avatar);
         }
         return res.status(404).json(`User with id ${id} not found`);

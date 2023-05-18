@@ -12,7 +12,7 @@ class ProductsService {
   async findAllProducts(queryObject) {
     let query = {};
     let pageNumber = 1;
-    const pageSize = process.env.PAGE_SIZE;
+    const pageSize = Number(process.env.PAGE_SIZE);
     if (queryObject.page) {
       pageNumber = queryObject.page;
     }

@@ -9,8 +9,17 @@ class UsersService {
     return await userModel.findById(id);
   }
 
-  async findAllUsers() {
-    return await userModel.find().sort({ createdAt: -1 });
+  async findAllUsers(page) {
+    let pageNumber = 1;
+    const pageSize = Number(process.env.PAGE_SIZE);
+    if (page) {
+      pageNumber = page;
+    }
+    return await userModel
+      .find()
+      .sort({ createdAt: -1 })
+      .skip(pageNumber * pageSize - pageSize)
+      .limit(pageSize);
   }
 
   async createUser(userData) {

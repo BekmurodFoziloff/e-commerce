@@ -26,11 +26,11 @@ class PaymentsController {
       const { paymentId } = req.params;
       const cachedPayment = await redisService.getValue(`payment:${paymentId}`);
       if (cachedPayment) {
-        return res.status(200).json(JSON.parse(cachedPayment));
+        return res.status(200).json(cachedPayment);
       } else {
         const payment = await stripe.charges.retrieve(paymentId);
         if (payment) {
-          await redisService.setValue(`payment:${paymentId}`, JSON.stringify(payment));
+          await redisService.setValue(`payment:${paymentId}`, payment);
           return res.status(200).json(payment);
         }
         return res.status(404).json(`Payment with id ${paymentId} not found`);
@@ -42,12 +42,13 @@ class PaymentsController {
 
   async findAllPayments(req, res, next) {
     try {
+      const { page } = req.query;
       const cachedPayments = await redisService.getValue('payments');
-      if (cachedPayments) {
-        return res.status(200).json(JSON.parse(cachedPayments));
+      if (cachedPayments && !page) {
+        return res.status(200).json(cachedPayments);
       } else {
-        const payments = await paymentsService.findAllPayments(req.user.id);
-        await redisService.setValue('payments', JSON.stringify(payments));
+        const payments = await paymentsService.findAllPayments(req.user.id, Number(page));
+        await redisService.setValue('payments', payments);
         return res.status(200).json(payments);
       }
     } catch (error) {

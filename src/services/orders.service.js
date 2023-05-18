@@ -8,7 +8,7 @@ class OrdersService {
   async findAllOrders(queryObject, userId) {
     let query = {};
     let pageNumber = 1;
-    const pageSize = process.env.PAGE_SIZE;
+    const pageSize = Number(process.env.PAGE_SIZE);
     if (userId) {
       query.customer = userId;
     } else if (queryObject.page) {
@@ -30,7 +30,7 @@ class OrdersService {
   }
 
   async createOrder(orderData) {
-    const newOrder = await orderModel.create(orderData);
+    const newOrder = (await orderModel.create(orderData)).populate('products.product');
     return await newOrder.save();
   }
 

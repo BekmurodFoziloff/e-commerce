@@ -36,7 +36,7 @@ class AuthController {
           ...req.body,
           password: hashedPassword
         });
-        await redisService.setValue(`user:${user.id}`, JSON.stringify(user));
+        await redisService.setValue(`user:${user.id}`, user);
         return res.status(201).json(user);
       }
     } catch (error) {
@@ -52,7 +52,7 @@ class AuthController {
         if (isPasswordMatching) {
           const tokenCookie = await authService.getCookieWithJwtToken(candidate.id);
           res.setHeader('Set-Cookie', tokenCookie);
-          await redisService.setValue(`user:${candidate.id}`, JSON.stringify(candidate));
+          await redisService.setValue(`user:${candidate.id}`, candidate);
           return res.status(200).json(candidate);
         } else {
           return res.status(400).json('Wrong credentials provided');

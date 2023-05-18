@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import productsService from '../services/products.service.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
-import { upload } from '../config/files.service.js';
+import upload from '../config/files.service.js';
 import redisService from '../config/redis.service.js';
 import { validateInput } from '../middlewares/validateInput.middleware.js';
 import { productSchema } from '../utils/inputData.validators.js';
@@ -46,11 +46,11 @@ class ProductsController {
       const { id } = req.params;
       const cachedProduct = await redisService.getValue(`product:${id}`);
       if (cachedProduct) {
-        return res.status(200).json(JSON.parse(cachedProduct));
+        return res.status(200).json(cachedProduct);
       } else {
         const product = await productsService.findProductById(id);
         if (product) {
-          await redisService.setValue(`product:${id}`, JSON.stringify(product));
+          await redisService.setValue(`product:${id}`, product);
           return res.status(200).json(product);
         }
         return res.status(404).json(`Product with id ${id} not found`);
@@ -63,11 +63,11 @@ class ProductsController {
   async findAllProducts(req, res, next) {
     try {
       const cachedProducts = await redisService.getValue('products');
-      if (cachedProducts) {
-        return res.status(200).json(JSON.parse(cachedProducts));
+      if (cachedProducts && !req.query) {
+        return res.status(200).json(cachedProducts);
       } else {
         const products = await productsService.findAllProducts(req.query);
-        await redisService.setValue('products', JSON.stringify(products));
+        await redisService.setValue('products', products);
         return res.status(200).json(products);
       }
     } catch (error) {
@@ -83,7 +83,7 @@ class ProductsController {
       }
       const newProduct = await productsService.createProduct(req.body, req.user, req.file.path);
       if (newProduct) {
-        await redisService.setValue(`product:${newProduct.id}`, JSON.stringify(newProduct));
+        await redisService.setValue(`product:${newProduct.id}`, newProduct);
         return res.status(201).json(newProduct);
       }
     } catch (error) {
@@ -100,7 +100,7 @@ class ProductsController {
       const { id } = req.params;
       const updatedProduct = await productsService.updateProduct(id, req.body);
       if (updatedProduct) {
-        await redisService.setValue(`product:${id}`, JSON.stringify(updatedProduct));
+        await redisService.setValue(`product:${id}`, updatedProduct);
         return res.status(200).json(updatedProduct);
       }
       return res.status(404).json(`Product with id ${id} not found`);
@@ -127,14 +127,14 @@ class ProductsController {
     try {
       const { id } = req.params;
       const cachedProduct = await redisService.getValue(`product:${id}`);
-      const product = JSON.parse(cachedProduct);
+      const product = cachedProduct;
       if (product && product.imageURL) {
         res.setHeader('Content-Type', 'image/jpeg');
         return res.sendFile(product.imageURL);
       } else {
         const product = await productsService.findProductById(id);
         if (product) {
-          await redisService.setValue(`product:${id}`, JSON.stringify(product));
+          await redisService.setValue(`product:${id}`, product);
           res.setHeader('Content-Type', 'image/jpeg');
           return res.sendFile(product.imageURL);
         }

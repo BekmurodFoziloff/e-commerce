@@ -5,8 +5,17 @@ class PaymentsService {
     return await paymentModel.findOne({ paymentId });
   }
 
-  async findAllPayments(userId) {
-    return await paymentModel.find({ customer: userId }).sort({ createdAt: -1 });
+  async findAllPayments(userId, page) {
+    let pageNumber = 1;
+    const pageSize = Number(process.env.PAGE_SIZE);
+    if (page) {
+      pageNumber = page;
+    }
+    return await paymentModel
+      .find({ customer: userId })
+      .sort({ createdAt: -1 })
+      .skip(pageNumber * pageSize - pageSize)
+      .limit(pageSize);
   }
 
   async createPayment(paymentData) {

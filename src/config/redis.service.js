@@ -17,7 +17,7 @@ class RedisService {
 
   async setValue(key, value) {
     return new Promise((resolve, reject) => {
-      this.client.set(key, value, async (error) => {
+      this.client.set(key, JSON.stringify(value), async (error) => {
         if (error) {
           reject(`Error setting key from Redis: ${error}`);
         } else {
@@ -36,7 +36,7 @@ class RedisService {
         if (error) {
           reject(`Error retrieving key from Redis: ${error}`);
         } else {
-          resolve(result);
+          resolve(JSON.parse(result));
         }
       });
     });
