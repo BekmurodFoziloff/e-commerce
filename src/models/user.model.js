@@ -6,14 +6,14 @@ const AddressSchema = new Schema(
     city: { type: String, required: true },
     state: { type: String, required: true },
     country: { type: String, required: true },
-    zipCode: { type: String, required: true }
+    zipCode: { type: Number, required: true }
   },
   { timestamps: true }
 );
 
 const UserSchema = new Schema(
   {
-    email: { type: String, required: true },
+    email: { type: String, index: 1, required: true },
     userName: { type: String, required: true },
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
@@ -23,6 +23,8 @@ const UserSchema = new Schema(
   },
   { timestamps: true }
 );
+
+UserSchema.index({ email: -1 });
 
 const UserModel = model('User', UserSchema);
 

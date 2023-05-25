@@ -2,19 +2,22 @@ import productModel from '../models/product.model.js';
 
 class ProductsService {
   async findProductById(id) {
-    return await productModel.findById(id).populate('owner', '-password');
+    return await productModel.findById(id).lean().populate('owner', '-password');
   }
 
   async findProductByIds(productIds) {
-    return await productModel.find({ _id: { $in: productIds } }).populate('owner', '-password');
+    return await productModel
+      .find({ _id: { $in: productIds } })
+      .lean()
+      .populate('owner', '-password');
   }
 
   async findAllProducts(queryObject) {
     let query = {};
     let pageNumber = 1;
-    const pageSize = Number(process.env.PAGE_SIZE);
+    const pageSize = process.env.PAGE_SIZE;
     if (queryObject.page) {
-      pageNumber = queryObject.page;
+      pageNumber = +queryObject.page;
     }
     if (queryObject.search) {
       query = {

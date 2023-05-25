@@ -61,7 +61,7 @@ class UsersController {
       if (cachedUsers && !page) {
         res.status(200).json(cachedUsers);
       } else {
-        const users = await usersService.findAllUsers(Number(page));
+        const users = await usersService.findAllUsers(page);
         await redisService.setValue('users', users);
         return res.status(200).json(users);
       }

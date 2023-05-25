@@ -44,6 +44,10 @@ class CartsController {
   async createCart(req, res, next) {
     try {
       const { productId, quantity } = req.body;
+      const product = await productsService.findProductById(productId);
+      if (!product) {
+        return res.status(404).json(`Product with id ${productId} not found`);
+      }
       const cachedCart = await redisService.getValue(`cartUserId:${req.user.id}`);
       let cart = req.cookies.cart || cachedCart || [];
       const existingItemIndex = cart.findIndex((item) => item.productId === productId);
@@ -64,6 +68,10 @@ class CartsController {
     try {
       const { productId } = req.params;
       const { quantity } = req.body;
+      const product = await productsService.findProductById(productId);
+      if (!product) {
+        return res.status(404).json(`Product with id ${productId} not found`);
+      }
       const cachedCart = await redisService.getValue(`cartUserId:${req.user.id}`);
       let cart = req.cookies.cart || cachedCart || [];
       const itemIndex = cart.findIndex((item) => item.productId === productId);

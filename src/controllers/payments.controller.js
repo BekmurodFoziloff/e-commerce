@@ -47,7 +47,7 @@ class PaymentsController {
       if (cachedPayments && !page) {
         return res.status(200).json(cachedPayments);
       } else {
-        const payments = await paymentsService.findAllPayments(req.user.id, Number(page));
+        const payments = await paymentsService.findAllPayments(req.user.id, page);
         await redisService.setValue('payments', payments);
         return res.status(200).json(payments);
       }
@@ -58,26 +58,20 @@ class PaymentsController {
 
   async createPayment(req, res, next) {
     try {
-      const { orderId, customerId, amount, name, email, token } = req.body;
-      const customer = await stripe.customers.create({
-        name,
-        email,
-        source: token
-      });
-      const charge = await stripe.charges.create({
+      const { orderId, customerId, amount } = req.body;
+      const paymentIntent = await stripe.paymentIntents.create({
         amount: amount * 100,
         currency: 'usd',
-        customer: customer.id,
         description: `Payment for order ${orderId}`
       });
       const payment = await paymentsService.createPayment({
         order: orderId,
         customer: customerId,
         amount,
-        paymentStatus: charge.status,
-        paymentId: charge.id
+        paymentStatus: paymentIntent.status,
+        paymentId: paymentIntent.id
       });
-      await redisService.setValue(`payment:${charge.id}`, charge);
+      await redisService.setValue(`payment:${paymentIntent.id}`, paymentIntent);
       res.status(201).json(payment);
     } catch (error) {
       return res.status(error.status || 500).json({ error: error.message });

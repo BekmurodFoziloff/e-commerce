@@ -2,16 +2,16 @@ import userModel from '../models/user.model.js';
 
 class UsersService {
   async findUserByEmail(email) {
-    return await userModel.findOne({ email });
+    return await userModel.findOne({ email }).lean();
   }
 
   async findUserById(id) {
-    return await userModel.findById(id);
+    return await userModel.findById(id).lean();
   }
 
   async findAllUsers(page) {
     let pageNumber = 1;
-    const pageSize = Number(process.env.PAGE_SIZE);
+    const pageSize = process.env.PAGE_SIZE;
     if (page) {
       pageNumber = page;
     }
@@ -19,7 +19,8 @@ class UsersService {
       .find()
       .sort({ createdAt: -1 })
       .skip(pageNumber * pageSize - pageSize)
-      .limit(pageSize);
+      .limit(pageSize)
+      .lean();
   }
 
   async createUser(userData) {
@@ -28,7 +29,7 @@ class UsersService {
   }
 
   async updateUser(id, userData) {
-    return await userModel.findByIdAndUpdate(id, userData, { returnDocument: 'after' });
+    return await userModel.findByIdAndUpdate(id, userData, { returnDocument: 'after' }).lean();
   }
 
   async deleteUser(id) {
@@ -36,12 +37,13 @@ class UsersService {
   }
 
   async updateUserAddress(id, addressData) {
-    return await userModel.findByIdAndUpdate(id, { $set: { address: addressData } }, { returnDocument: 'after' });
+    return await userModel
+      .findByIdAndUpdate(id, { $set: { address: addressData } }, { returnDocument: 'after' })
+      .lean();
   }
 
   async addAvatar(id, avatar) {
-    console.log(avatar);
-    return await userModel.findByIdAndUpdate(id, { $set: { avatar } }, { returnDocument: 'after' });
+    return await userModel.findByIdAndUpdate(id, { $set: { avatar } }, { returnDocument: 'after' }).lean();
   }
 }
 

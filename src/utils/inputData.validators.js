@@ -24,7 +24,7 @@ export const updateUserAddressSchema = Joi.object({
   city: Joi.string().required(),
   state: Joi.string().required(),
   country: Joi.string().required(),
-  zipCode: Joi.string().required()
+  zipCode: Joi.number().required()
 });
 
 export const productSchema = Joi.object({

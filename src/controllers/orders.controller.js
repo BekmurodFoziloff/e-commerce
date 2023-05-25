@@ -68,7 +68,7 @@ class OrdersController {
       const cachedCart = await redisService.getValue(`cartUserId:${req.user.id}`);
       let cart = req.cookies.cart || cachedCart || [];
       let subTotalPrice = 0;
-      if (cart) {
+      if (Array.isArray(cart) && cart.length > 0) {
         for (const item of cart) {
           const product = await productsService.findProductById(item.productId);
           subTotalPrice += product.price * item.quantity;
@@ -88,6 +88,8 @@ class OrdersController {
           await emailService.sendCreatedOrder(newOrder);
           return res.status(201).json(newOrder);
         }
+      } else {
+        return res.status(400).json('Cart cannot be empty');
       }
     } catch (error) {
       return res.status(error.status || 500).json({ error: error.message });

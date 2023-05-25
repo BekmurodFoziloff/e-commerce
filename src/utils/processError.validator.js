@@ -25,7 +25,7 @@ export const updateUserAddressMiddleware = [
   body('city').trim().escape().notEmpty().withMessage('City is required.'),
   body('state').trim().escape().notEmpty().withMessage('State is required.'),
   body('country').trim().escape().notEmpty().withMessage('Country is required.'),
-  body('zipCode').trim().escape().notEmpty().withMessage('Zip code is required.')
+  body('zipCode').isNumeric().notEmpty().withMessage('Zip code is required.')
 ];
 
 export const productMiddleware = [
