@@ -10,10 +10,10 @@ class CartsController {
   router = Router();
 
   constructor() {
-    this.setRotes();
+    this.setRoutes();
   }
 
-  setRotes() {
+  setRoutes() {
     this.router.route(`${this.path}`).get(authMiddleware, this.getCart);
     this.router.route(`${this.path}/new`).post(authMiddleware, validateInput(createCartSchema), this.createCart);
     this.router

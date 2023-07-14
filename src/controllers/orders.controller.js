@@ -13,10 +13,10 @@ class OrdersController {
   router = Router();
 
   constructor() {
-    this.setRotes();
+    this.setRoutes();
   }
 
-  setRotes() {
+  setRoutes() {
     this.router.route(`${this.path}/:id`).get(authMiddleware, isCustomerOrder, this.findOrderById);
     this.router.route(`${this.path}`).get(authMiddleware, this.findAllOrders);
     this.router.route(`${this.path}/new`).post(authMiddleware, this.createOrder);

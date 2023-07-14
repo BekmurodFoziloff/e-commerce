@@ -12,10 +12,10 @@ class AuthController {
   router = Router();
 
   constructor() {
-    this.setRotes();
+    this.setRoutes();
   }
 
-  setRotes() {
+  setRoutes() {
     this.router.route(`${this.path}/register`).post(validateInput(registerSchema), registerMiddleware, this.register);
     this.router.route(`${this.path}/login`).post(validateInput(loginSchema), this.logIn);
     this.router.route(`${this.path}/logout`).get(this.logOut);

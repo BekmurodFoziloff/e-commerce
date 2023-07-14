@@ -12,10 +12,10 @@ class PaymentsController {
   router = Router();
 
   constructor() {
-    this.setRotes();
+    this.setRoutes();
   }
 
-  setRotes() {
+  setRoutes() {
     this.router.route(`${this.path}/:paymentId`).get(authMiddleware, isCustomerPayment, this.findPaymentById);
     this.router.route(`${this.path}`).get(authMiddleware, this.findAllPayments);
     this.router.route(`${this.path}`).post(authMiddleware, this.createPayment);

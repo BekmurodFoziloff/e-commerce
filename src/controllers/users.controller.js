@@ -13,10 +13,10 @@ class UsersController {
   router = Router();
 
   constructor() {
-    this.setRotes();
+    this.setRoutes();
   }
 
-  setRotes() {
+  setRoutes() {
     this.router.route(`${this.path}/:id`).get(authMiddleware, this.findUserById);
     this.router.route(`${this.path}`).get(authMiddleware, this.findAllUsers);
     this.router

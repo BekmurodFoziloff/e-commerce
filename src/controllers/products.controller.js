@@ -13,10 +13,10 @@ class ProductsController {
   router = Router();
 
   constructor() {
-    this.setRotes();
+    this.setRoutes();
   }
 
-  setRotes() {
+  setRoutes() {
     this.router.route(`${this.path}/:id`).get(this.findProductById);
     this.router.route(`${this.path}`).get(this.findAllProducts);
     this.router
