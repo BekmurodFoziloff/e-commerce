@@ -1,12 +1,12 @@
 import { Router } from 'express';
 import usersService from '../services/users.service.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
-import upload from '../config/files.service.js';
-import redisService from '../config/redis.service.js';
+import upload from '../services/files.service.js';
+import redisService from '../services/redis.service.js';
 import { validateInput } from '../middlewares/validateInput.middleware.js';
-import { updateUserAddressSchema, updateUserSchema } from '../utils/inputData.validators.js';
+import { updateUserAddressSchema, updateUserSchema } from '../validators/joiSchemes.validator.js';
 import { validationResult } from 'express-validator';
-import { updateUserAddressMiddleware, updateUserMiddleware } from '../utils/processError.validator.js';
+import { updateUserAddressMiddleware, updateUserMiddleware } from '../validators/expressMiddlewares.validator.js';
 
 class UsersController {
   path = '/user';
@@ -31,8 +31,8 @@ class UsersController {
         updateUserAddressMiddleware,
         this.updateUserAddress
       );
-    this.router.route(`${this.path}/:id/avatar`).patch(authMiddleware, upload.single('avatar'), this.addAvatar);
-    this.router.route(`${this.path}/:id/image`).get(authMiddleware, this.getUserImage);
+    this.router.route(`${this.path}/:id/avatar`).patch(authMiddleware, upload.single('avatar'), this.addUserAvatar);
+    this.router.route(`${this.path}/:id/image`).get(authMiddleware, this.getUserAvatar);
   }
 
   async findUserById(req, res, next) {
@@ -120,10 +120,10 @@ class UsersController {
     }
   }
 
-  async addAvatar(req, res, next) {
+  async addUserAvatar(req, res, next) {
     try {
       const { id } = req.params;
-      const updatedUser = await usersService.addAvatar(id, req.file.path);
+      const updatedUser = await usersService.addUserAvatar(id, req.file.path);
       if (updatedUser) {
         await redisService.setValue(`user:${id}`, updatedUser);
         return res.status(200).json(updatedUser);
@@ -134,13 +134,12 @@ class UsersController {
     }
   }
 
-  async getUserImage(req, res, next) {
+  async getUserAvatar(req, res, next) {
     try {
       const { id } = req.params;
       const cachedUser = await redisService.getValue(`user:${id}`);
-      const user = cachedUser;
-      if (user && user.avatar) {
-        return res.sendFile(user.avatar);
+      if (cachedUser && cachedUser.avatar) {
+        return res.sendFile(cachedUser.avatar);
       } else {
         const user = await usersService.findUserById(id);
         if (user) {

@@ -42,7 +42,7 @@ class UsersService {
       .lean();
   }
 
-  async addAvatar(id, avatar) {
+  async addUserAvatar(id, avatar) {
     return await userModel.findByIdAndUpdate(id, { $set: { avatar } }, { returnDocument: 'after' }).lean();
   }
 }

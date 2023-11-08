@@ -2,10 +2,11 @@ import { Router } from 'express';
 import usersService from '../services/users.service.js';
 import authService from '../services/auth.service.js';
 import { validateInput } from '../middlewares/validateInput.middleware.js';
-import { loginSchema, registerSchema } from '../utils/inputData.validators.js';
-import redisService from '../config/redis.service.js';
+import { loginSchema, registerSchema } from '../validators/joiSchemes.validator.js';
+import redisService from '../services/redis.service.js';
 import { validationResult } from 'express-validator';
-import { registerMiddleware } from '../utils/processError.validator.js';
+import { registerMiddleware } from '../validators/expressMiddlewares.validator.js';
+import authMiddleware from '../middlewares/auth.middleware.js';
 
 class AuthController {
   path = '/auth';
@@ -18,7 +19,7 @@ class AuthController {
   setRoutes() {
     this.router.route(`${this.path}/register`).post(validateInput(registerSchema), registerMiddleware, this.register);
     this.router.route(`${this.path}/login`).post(validateInput(loginSchema), this.logIn);
-    this.router.route(`${this.path}/logout`).get(this.logOut);
+    this.router.route(`${this.path}/logout`).get(authMiddleware, this.logOut);
   }
 
   async register(req, res, next) {
@@ -50,8 +51,8 @@ class AuthController {
       if (candidate) {
         const isPasswordMatching = await authService.verifyPassword(req.body.password, candidate.password);
         if (isPasswordMatching) {
-          const tokenCookie = await authService.getCookieWithJwtToken(candidate.id);
-          res.setHeader('Set-Cookie', tokenCookie);
+          const cookieWithJwtToken = await authService.getCookieWithJwtToken(candidate.id);
+          res.setHeader('Set-Cookie', cookieWithJwtToken);
           await redisService.setValue(`user:${candidate.id}`, candidate);
           return res.status(200).json(candidate);
         } else {
@@ -66,9 +67,9 @@ class AuthController {
   }
 
   async logOut(req, res, next) {
-    const cookiesForLogOut = await authService.getCookiesForLogOut();
+    const cookieForLogOut = await authService.getCookieForLogOut();
     // res.clearCookie('token');
-    res.setHeader('Set-Cookie', cookiesForLogOut);
+    res.setHeader('Set-Cookie', cookieForLogOut);
     return res.sendStatus(200);
   }
 }

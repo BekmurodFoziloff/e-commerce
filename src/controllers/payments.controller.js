@@ -3,7 +3,7 @@ import Stripe from 'stripe';
 import paymentsService from '../services/payments.service.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
 import { isCustomerPayment } from '../middlewares/isCustomerPayment.middleware.js';
-import redisService from '../config/redis.service.js';
+import redisService from '../services/redis.service.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 

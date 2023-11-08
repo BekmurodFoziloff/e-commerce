@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import productsService from '../services/products.service.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
-import redisService from '../config/redis.service.js';
+import redisService from '../services/redis.service.js';
 import { validateInput } from '../middlewares/validateInput.middleware.js';
-import { createCartSchema, updateCartSchema } from '../utils/inputData.validators.js';
+import { createCartSchema, updateCartSchema } from '../validators/joiSchemes.validator.js';
 
 class CartsController {
   path = '/cart';
@@ -24,7 +24,7 @@ class CartsController {
 
   async getCart(req, res, next) {
     try {
-      const cachedCart = await redisService.getValue(`cartUserId:${req.user.id}`);
+      const cachedCart = await redisService.getValue(`customerIdOfCart:${req.user.id}`);
       const cart = req.cookies.cart || cachedCart || [];
       const productIds = cart.map((item) => item.productId);
       const products = await productsService.findProductByIds(productIds);
@@ -48,7 +48,7 @@ class CartsController {
       if (!product) {
         return res.status(404).json(`Product with id ${productId} not found`);
       }
-      const cachedCart = await redisService.getValue(`cartUserId:${req.user.id}`);
+      const cachedCart = await redisService.getValue(`customerIdOfCart:${req.user.id}`);
       let cart = req.cookies.cart || cachedCart || [];
       const existingItemIndex = cart.findIndex((item) => item.productId === productId);
       if (existingItemIndex !== -1) {
@@ -56,7 +56,7 @@ class CartsController {
       } else {
         cart.push({ productId, quantity });
       }
-      await redisService.setValue(`cartUserId:${req.user.id}`, cart);
+      await redisService.setValue(`customerIdOfCart:${req.user.id}`, cart);
       res.cookie('cart', cart, { httpOnly: true, secure: true });
       res.status(201).json(cart);
     } catch (error) {
@@ -72,13 +72,13 @@ class CartsController {
       if (!product) {
         return res.status(404).json(`Product with id ${productId} not found`);
       }
-      const cachedCart = await redisService.getValue(`cartUserId:${req.user.id}`);
+      const cachedCart = await redisService.getValue(`customerIdOfCart:${req.user.id}`);
       let cart = req.cookies.cart || cachedCart || [];
       const itemIndex = cart.findIndex((item) => item.productId === productId);
       if (itemIndex !== -1) {
         cart[itemIndex].quantity = Number(quantity);
       }
-      await redisService.setValue(`cartUserId:${req.user.id}`, cart);
+      await redisService.setValue(`customerIdOfCart:${req.user.id}`, cart);
       res.cookie('cart', cart, { httpOnly: true, secure: true });
       res.status(200).json(cart);
     } catch (error) {
@@ -89,13 +89,13 @@ class CartsController {
   async deleteCart(req, res, next) {
     try {
       const { productId } = req.params;
-      const cachedCart = await redisService.getValue(`cartUserId:${req.user.id}`);
+      const cachedCart = await redisService.getValue(`customerIdOfCart:${req.user.id}`);
       let cart = req.cookies.cart || cachedCart || [];
       const itemIndex = cart.findIndex((item) => item.productId === productId);
       if (itemIndex !== -1) {
         cart.splice(itemIndex, 1);
       }
-      await redisService.setValue(`cartUserId:${req.user.id}`, cart);
+      await redisService.setValue(`customerIdOfCart:${req.user.id}`, cart);
       res.cookie('cart', cart, { httpOnly: true, secure: true });
       res.status(200).json(cart);
     } catch (error) {

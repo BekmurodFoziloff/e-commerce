@@ -1,12 +1,12 @@
 import { Router } from 'express';
 import productsService from '../services/products.service.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
-import upload from '../config/files.service.js';
-import redisService from '../config/redis.service.js';
+import upload from '../services/files.service.js';
+import redisService from '../services/redis.service.js';
 import { validateInput } from '../middlewares/validateInput.middleware.js';
-import { productSchema } from '../utils/inputData.validators.js';
+import { productSchema } from '../validators/joiSchemes.validator.js';
 import { validationResult } from 'express-validator';
-import { productMiddleware } from '../utils/processError.validator.js';
+import { productMiddleware } from '../validators/expressMiddlewares.validator.js';
 
 class ProductsController {
   path = '/product';
@@ -127,10 +127,9 @@ class ProductsController {
     try {
       const { id } = req.params;
       const cachedProduct = await redisService.getValue(`product:${id}`);
-      const product = cachedProduct;
-      if (product && product.imageURL) {
+      if (cachedProduct && cachedProduct.imageURL) {
         res.setHeader('Content-Type', 'image/jpeg');
-        return res.sendFile(product.imageURL);
+        return res.sendFile(cachedProduct.imageURL);
       } else {
         const product = await productsService.findProductById(id);
         if (product) {

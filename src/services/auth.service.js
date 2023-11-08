@@ -18,7 +18,7 @@ class AuthService {
     return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${process.env.JWT_TOKEN_EXPIRATION_TIME}`;
   }
 
-  async getCookiesForLogOut() {
+  async getCookieForLogOut() {
     return 'Authentication=; HttpOnly; Path=/; Max-Age=0';
   }
 }

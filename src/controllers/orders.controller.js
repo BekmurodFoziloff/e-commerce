@@ -2,11 +2,11 @@ import { Router } from 'express';
 import ordersService from '../services/orders.service.js';
 import productsService from '../services/products.service.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
-import emailService from '../config/emails.service.js';
+import emailService from '../services/emails.service.js';
 import { isCustomerOrder } from '../middlewares/isCustomerOrder.middleware.js';
-import redisService from '../config/redis.service.js';
+import redisService from '../services/redis.service.js';
 import { validateInput } from '../middlewares/validateInput.middleware.js';
-import { updaetOrderSchema, updateOrderStatusSchema } from '../utils/inputData.validators.js';
+import { updaetOrderSchema, updateOrderStatusSchema } from '../validators/joiSchemes.validator.js';
 
 class OrdersController {
   path = '/order';
@@ -105,10 +105,10 @@ class OrdersController {
         const product = await productsService.findProductById(item.product.id);
         subTotalPrice += product.price * item.quantity;
       }
-      const updateOrder = await ordersService.updateOrderSubTotalPrice(id, subTotalPrice);
-      if (updateOrder) {
-        await redisService.setValue(`order:${id}`, updateOrder);
-        return res.status(200).json(updateOrder);
+      const updatedOrderSubTotalPrice = await ordersService.updateOrderSubTotalPrice(id, subTotalPrice);
+      if (updatedOrderSubTotalPrice) {
+        await redisService.setValue(`order:${id}`, updatedOrderSubTotalPrice);
+        return res.status(200).json(updatedOrderSubTotalPrice);
       }
       return res.status(404).json(`Order with id ${id} not found`);
     } catch (error) {
